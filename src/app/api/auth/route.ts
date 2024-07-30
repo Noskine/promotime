@@ -1,25 +1,50 @@
 import { verify } from "jsonwebtoken";
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
-export async function POST(req: Request) {
-    const { token } = await req.json()
-    try {  
-        if (!token) {
-            return NextResponse.json('Token não fornecido.');
-        }
-
-        //@ts-ignore
-        return verify(token, process.env.JWT_Secret!, (err, decode) => {
-            if (err instanceof Error) {
-                throw new Error(err.message)
-            }
-
-            return NextResponse.json(decode);
-        });
-    } catch(err) {
-        return new NextResponse(JSON.stringify("Token expired or invalid"), {
-            status: 401,
-            headers: {"Content-type": "application/json"}
-          })
+async function verifyToken(request: NextRequest) {
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader) {
+      return new NextResponse(JSON.stringify({ message: 'Token não fornecido.' }), {
+        status: 403,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
+  
+    const token = authHeader.split(' ')[1];
+    if (!token) {
+      return new NextResponse(JSON.stringify({ message: 'Token não fornecido.' }), {
+        status: 403,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+  
+    try {
+      const decoded = verify(token, process.env.JWT_Secret!);
+      return decoded;
+    } catch (error: any) {
+      if (error.name === 'TokenExpiredError') {
+        return new NextResponse(JSON.stringify({ message: 'Token expirou.' }), {
+          status: 401,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      } else {
+        return new NextResponse(JSON.stringify({ message: 'Token inválido.' }), {
+          status: 401,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+    }
+  }
+
+export async function GET(request: NextRequest) {
+    const verificationResult = await verifyToken(request)
+    if (verificationResult instanceof NextResponse) {
+        return verificationResult;
+    }
+    
+    return new NextResponse(JSON.stringify({ message: 'Acesso concedido.', user : verificationResult }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
 }

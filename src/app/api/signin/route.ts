@@ -20,7 +20,8 @@ export async function POST(request: Request) {
 
       if( await comparePassword(data.pass, user?.Password!) ){
 
-        const jwtToken = sign({ id: user?.Id, email: user?.Email, }, process.env.JWT_Secret!, { expiresIn: '5s' })
+        const jwtToken = sign({ id: user?.Id, email: user?.Email, }, process.env.JWT_Secret!, 
+          { expiresIn: '30m' })
         return NextResponse.json(jwtToken)
       }
     } catch (error) {

@@ -8,16 +8,21 @@ interface PrivateRouteProps {
 }
 
 export default function PrivateRoute({ children }: PrivateRouteProps) {
+    'use client'
     const { push } = useRouter();
     const [auth, setAuth] = useState(false)
+
+
     useEffect(() => {
         const token = localStorage.getItem('token_auth')
 
         if (!token) {
             push(APP_ROUTES.login)
         } else {
-            axios.post('/api/auth', {
-                token
+            axios.get('/api/auth', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
             }).then(() => {
                 setAuth(true)
             }).catch(() => {
