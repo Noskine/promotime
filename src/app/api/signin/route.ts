@@ -1,8 +1,5 @@
 'use server'
-
-import { comparePassword } from "@/lib/bcrypt";
-import prisma from "@/lib/prisma";
-import { sign } from "jsonwebtoken";
+import UserUsecases from "@/server/UseCases/UserUsecases";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -12,22 +9,36 @@ const schema = z.object({
 })
 
 export async function POST(request: Request) {
-    const data = await request.json();
-    try {
-      schema.parse(data)
-      
-      const user = await prisma.user.findUnique({where: {Email: data.email}})
+  const data = await request.json()
+  try {
+    schema.parse(data)
 
-      if( await comparePassword(data.pass, user?.Password!) ){
+    const token = await UserUsecases.singIn(data)
 
-        const jwtToken = sign({ id: user?.Id, email: user?.Email, }, process.env.JWT_Secret!, 
-          { expiresIn: '30m' })
-        return NextResponse.json(jwtToken)
+    return NextResponse.json(token)
+  } catch (error) {
+    if (error instanceof Error) {
+      if (error.name == 'ZodError') {
+        return new NextResponse(JSON.stringify({
+          Error: 'Error in data validation',
+          cause: 'Invalid data sent by the client to the server',
+        },), { status: 400 })
       }
-    } catch (error) {
-      return new NextResponse(JSON.stringify(error), {
-        status: 401,
-        headers: {"Content-type": "application/json"}
-      })
+
+      if (error.name == 'UserNotFound') {
+        return new NextResponse(JSON.stringify({
+          Error: error.message,
+          cause: error.cause,
+          //@ts-ignore
+        }), { status: error.statusCode! })
+      }
+
+      return new NextResponse(JSON.stringify({
+        Error: error.message,
+        cause: error.cause,
+        //@ts-ignore
+      }), { status: error.statusCode! })
     }
   }
+}
+

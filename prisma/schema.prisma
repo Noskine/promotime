@@ -14,8 +14,30 @@ datasource db {
 }
 
 model User {
-  Id        String   @id @default(uuid()) @map("_id")
-  Email     String   @unique
-  Password  String
-  CreatedAt DateTime @default(now()) @db.Timestamp(6)
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+}
+
+model Store {
+  id      String   @id @default(uuid())
+  name    String   @unique
+  coupons Coupon[]
+}
+
+model Product {
+  id           String   @id @default(uuid())
+  title        String
+  description  String
+  couponAdding Coupon[]
+}
+
+model Coupon {
+  id          String    @id @default(uuid())
+  description String
+  code        String    @map("_code_coupons")
+  Store       Store     @relation(fields: [storeId], references: [id])
+  storeId     String
+  product     Product[]
 }

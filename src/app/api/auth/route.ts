@@ -1,3 +1,4 @@
+import { hashPassword } from "@/lib/bcrypt";
 import { verify } from "jsonwebtoken";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
@@ -20,7 +21,7 @@ async function verifyToken(request: NextRequest) {
     }
   
     try {
-      const decoded = verify(token, process.env.JWT_Secret!);
+      const decoded = verify(token, process.env.JWT_SECRET!);
       return decoded;
     } catch (error: any) {
       if (error.name === 'TokenExpiredError') {
@@ -47,4 +48,9 @@ export async function GET(request: NextRequest) {
         status: 200,
         headers: { 'Content-Type': 'application/json' },
       });
+}
+
+export async function POST(request: Request) {
+  const { pass } = await request.json()
+  return NextResponse.json(await hashPassword(pass))
 }

@@ -24,6 +24,7 @@ export default function LoginForm() {
             email,
             pass,
         }).then((e) => {
+            console.log(e   )
             localStorage.setItem("token_auth", e.data)
 
             push('/dashboard')
@@ -40,7 +41,7 @@ export default function LoginForm() {
                 <label htmlFor="pass" className="capitalize text-sm">senha</label>
                 <Input type="password" {...register('pass')} className="w-full bg-transparent border-2 rounded-[100px] text-zinc-50" />
             </div>
-            <Button type="submit" className="rounded-[100px] bg-zinc-900 hover:bg-neutral-900">Login</Button>
+            <Button type="submit" className="rounded-[100px] bg-zinc-900 hover:bg-neutral-900 dark:text-zinc-50">Login</Button>
         </form >
     )
 }
