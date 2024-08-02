@@ -12,7 +12,7 @@ interface CardProps {
 
 export function Card({ children, title, price, priceBefore, srcIconStore }: CardProps) {
   return (
-    <section className="p-3 w-full shadow-md cursor-pointer bg-white text-zinc-800 rounded-lg ">
+    <section className="p-3 w-full shadow-md  cursor-pointer bg-white text-zinc-800 rounded-lg ">
       <section className="relative">
         {children}
         <Image 

@@ -37,7 +37,7 @@ export default function Header() {
             className='w-[100px] dark:contrast-[100%]'
           />
         </Link>
-        <NavigationMenu className='dark:text-zinc-100'>
+        <NavigationMenu className='dark:text-zinc-100 hidden md:block'>
           <NavigationMenuList>
             <NavigationMenuItem>
               <Link href="/coupon" legacyBehavior passHref>
